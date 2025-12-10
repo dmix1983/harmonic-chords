@@ -1,65 +1,149 @@
-import Image from "next/image";
+import { supabase } from '../lib/supabaseClient';
 
-export default function Home() {
+type Song = {
+  id: string;
+  title: string;
+  artist: string | null;
+};
+
+type Chord = {
+  id: string;
+  position_in_section: number | null;
+  chord_symbol: string;
+};
+
+export default async function Home() {
+  // 1) Get all songs
+  const { data: songs, error: songsError } = await supabase
+    .from('songs')
+    .select('id, title, artist')
+    .order('title', { ascending: true });
+
+  if (songsError) {
+    console.error('Error loading songs:', songsError.message);
+  }
+
+  // 2) Find the "Dreams" song (if it exists)
+  const dreamsSong = songs?.find(
+    (song: Song) => song.title.toLowerCase() === 'dreams'
+  );
+
+  let dreamsChords: Chord[] | null = null;
+  let chordsErrorMessage: string | null = null;
+
+  if (dreamsSong) {
+    const { data: chords, error: chordsError } = await supabase
+      .from('song_chords')
+      .select('id, position_in_section, chord_symbol')
+      .eq('song_id', dreamsSong.id)
+      .eq('level', 1)
+      .order('position_in_section', { ascending: true });
+
+    if (chordsError) {
+      console.error('Error loading chords:', chordsError.message);
+      chordsErrorMessage = chordsError.message;
+    } else {
+      dreamsChords = chords;
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        padding: '2rem',
+        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+        background: '#050816',
+        color: '#f9fafb',
+      }}
+    >
+      <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
+        HarmonIQ — Songs in your library
+      </h1>
+
+      {/* Songs list */}
+      {!songs || songs.length === 0 ? (
+        <p>No songs found yet.</p>
+      ) : (
+        <ul style={{ listStyle: 'none', padding: 0, width: '100%', maxWidth: '600px' }}>
+          {songs.map((song: Song) => (
+            <li
+              key={song.id}
+              style={{
+                padding: '0.75rem 1rem',
+                marginBottom: '0.5rem',
+                borderRadius: '0.5rem',
+                background: '#111827',
+                border: '1px solid #1f2937',
+              }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+              <div style={{ fontWeight: 600 }}>{song.title}</div>
+              {song.artist && (
+                <div style={{ fontSize: '0.9rem', color: '#9ca3af' }}>{song.artist}</div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Divider */}
+      <hr
+        style={{
+          width: '100%',
+          maxWidth: '600px',
+          margin: '2rem 0 1rem',
+          borderColor: '#1f2937',
+        }}
+      />
+
+      {/* Dreams chords display */}
+      <section style={{ width: '100%', maxWidth: '600px' }}>
+        <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
+          Dreams — Level 1 chords
+        </h2>
+
+        {!dreamsSong && <p>Dreams is not in your songs table yet.</p>}
+
+        {dreamsSong && chordsErrorMessage && (
+          <p>Could not load chords: {chordsErrorMessage}</p>
+        )}
+
+        {dreamsSong && !chordsErrorMessage && (!dreamsChords || dreamsChords.length === 0) && (
+          <p>No chords found for Dreams at level 1.</p>
+        )}
+
+        {dreamsSong && dreamsChords && dreamsChords.length > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              gap: '0.5rem',
+              flexWrap: 'wrap',
+              padding: '0.75rem 1rem',
+              borderRadius: '0.5rem',
+              background: '#111827',
+              border: '1px solid #1f2937',
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            {dreamsChords.map((chord) => (
+              <span
+                key={chord.id}
+                style={{
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '999px',
+                  border: '1px solid #4b5563',
+                  fontSize: '0.95rem',
+                }}
+              >
+                {chord.chord_symbol}
+              </span>
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
   );
 }
