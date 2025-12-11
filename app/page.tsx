@@ -81,7 +81,17 @@ export default async function Home() {
                 border: '1px solid #1f2937',
               }}
             >
-              <div style={{ fontWeight: 600 }}>{song.title}</div>
+<a
+  href={`/song?songId=${song.id}`}
+  style={{
+    fontWeight: 600,
+    textDecoration: 'none',
+    color: '#f9fafb',
+  }}
+>
+  {song.title}
+</a>
+
               {song.artist && (
                 <div style={{ fontSize: '0.9rem', color: '#9ca3af' }}>{song.artist}</div>
               )}
