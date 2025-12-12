@@ -1,37 +1,30 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function SongPage() {
-  const searchParams = useSearchParams();
-  const songParam = searchParams.get("song");
-
+  const { slug } = useParams();
   const [songData, setSongData] = useState<any>(null);
 
   useEffect(() => {
-    if (!songParam) return;
+    if (!slug) return;
 
     async function loadSong() {
       try {
-        const res = await fetch(`/songs/${songParam}.json`);
+        const res = await fetch(`/songs/${slug}.json`);
         const data = await res.json();
         setSongData(data);
       } catch (err) {
-        console.error("Error loading song data:", err);
+        console.error("Error loading song:", err);
       }
     }
 
     loadSong();
-  }, [songParam]);
+  }, [slug]);
 
-  if (!songParam) {
-    return <div className="p-6 text-red-500">No song specified.</div>;
-  }
-
-  if (!songData) {
-    return <div className="p-6">Loading song...</div>;
-  }
+  if (!slug) return <div>No song specified.</div>;
+  if (!songData) return <div>Loading song...</div>;
 
   return (
     <div className="p-6">
@@ -49,6 +42,4 @@ export default function SongPage() {
     </div>
   );
 }
-
-export const dynamic = "force-dynamic";
 
