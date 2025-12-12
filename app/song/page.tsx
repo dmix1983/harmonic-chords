@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 export default function SongPage() {
   const searchParams = useSearchParams();
-  const songParam = searchParams.get("song"); // e.g. "let-it-be"
+  const songParam = searchParams.get("song");
 
   const [songData, setSongData] = useState<any>(null);
 
@@ -49,4 +49,6 @@ export default function SongPage() {
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";
 
