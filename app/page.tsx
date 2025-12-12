@@ -29,14 +29,12 @@ export default function HomePage() {
     <main className="min-h-screen bg-neutral-950 text-neutral-100 flex justify-center px-4 py-12">
       <div className="w-full max-w-2xl">
         {/* Brand header */}
-        <header className="mb-12">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">
-            HarmonIQ
-          </h1>
-          <p className="text-neutral-400 text-base italic">
-            Progress should never feel accidental.
-          </p>
-        </header>
+<header className="mb-12">
+  <h1 className="text-4xl font-bold tracking-tight mb-2">
+    HarmonIQ
+  </h1>
+</header>
+
 
         {/* Song list */}
         <section className="space-y-2">
