@@ -59,7 +59,7 @@ export default function HomePage() {
           ))}
 
           {songs.length === 0 && (
-            <p classnName="text-neutral-500 mt-4">No songs found.</p>
+            <p className="text-neutral-500 mt-4">No songs found.</p>
           )}
         </section>
       </div>
