@@ -14,7 +14,6 @@ export default function HomePage() {
   useEffect(() => {
     async function loadSongs() {
       try {
-        // Load the list of songs from a JSON file you maintain in /public
         const res = await fetch("/songs/index.json");
         const data = await res.json();
         setSongs(data);
@@ -27,21 +26,43 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main className="p-6">
-      <h1 className="text-3xl font-bold mb-4">HarmonIQ Songs</h1>
+    <main className="min-h-screen bg-neutral-950 text-neutral-100 flex justify-center px-4 py-12">
+      <div className="w-full max-w-2xl">
+        {/* Brand header */}
+        <header className="mb-12">
+          <h1 className="text-4xl font-bold tracking-tight mb-2">
+            HarmonIQ
+          </h1>
+          <p className="text-neutral-400 text-base italic">
+            Progress should never feel accidental.
+          </p>
+        </header>
 
-      <ul className="list-disc ml-6 space-y-2">
-        {songs.map((song) => (
-          <li key={song.slug}>
-            <Link
-              href={`/song/${song.slug}`}
-              className="text-blue-500 underline hover:text-blue-700"
-            >
-              {song.title}
-            </Link>
-          </li>
-        ))}
-      </ul>
+        {/* Song list */}
+        <section className="space-y-2">
+          {songs.map((song, index) => (
+            <div key={song.slug}>
+              <Link
+                href={`/song/${song.slug}`}
+                className="block px-4 py-3 rounded-md transition-all duration-200
+                           hover:bg-neutral-800 hover:text-white
+                           text-lg font-medium"
+              >
+                {song.title}
+              </Link>
+
+              {/* Divider except after last item */}
+              {index < songs.length - 1 && (
+                <div className="border-b border-neutral-800 my-2" />
+              )}
+            </div>
+          ))}
+
+          {songs.length === 0 && (
+            <p classnName="text-neutral-500 mt-4">No songs found.</p>
+          )}
+        </section>
+      </div>
     </main>
   );
 }
